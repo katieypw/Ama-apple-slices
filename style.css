@@ -1,0 +1,305 @@
+
+/* =========================
+   BASIC
+========================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+
+  background: #C9362B;
+
+  font-family: Arial, sans-serif;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow: hidden;
+}
+
+
+/* =========================
+   PAGE
+========================= */
+
+.page {
+  position: relative;
+
+  width: calc(100vw - 30px);
+  height: calc(100vh - 30px);
+
+  background: #F7E7A8;
+
+  border-radius: 30px;
+
+  overflow: hidden;
+}
+
+
+/* =========================
+   SCREENS
+========================= */
+
+.screen {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  position: relative;
+  z-index: 5;
+}
+
+.hidden {
+  display: none;
+}
+
+
+/* =========================
+   TITLE
+========================= */
+
+h1 {
+  margin: 0 0 45px;
+font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  color: #6B351A;
+
+  font-size: 25px;
+  font-weight: 500;
+
+  text-align: center;
+}
+
+
+/* =========================
+   APPLE SEED
+========================= */
+
+.seed {
+  width: 105px;
+  height: 145px;
+
+  background: #7A421F;
+
+  border: none;
+  border-radius: 55% 45% 50% 50%;
+
+  transform: rotate(-12deg);
+
+  cursor: pointer;
+
+  transition: transform 0.25s ease;
+}
+
+.seed:hover {
+  transform: rotate(-12deg) scale(1.08);
+}
+
+.seed:active {
+  transform: rotate(-12deg) scale(0.95);
+}
+
+
+/* =========================
+   LETTERBOX
+========================= */
+
+.letterbox {
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 15px;
+}
+
+textarea {
+  width: 360px;
+  height: 150px;
+
+  padding: 20px;
+
+  background: #FFF4C7;
+
+  border: 10px solid #C9362B;
+  border-radius: 100px;
+
+  color: #6B351A;
+
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+
+  resize: none;
+  outline: none;
+
+  text-align: center;
+}
+
+textarea:focus {
+  border-color: #7A421F;
+}
+
+textarea::placeholder {
+  color: #A47B5B;
+}
+
+
+/* =========================
+   SEND BUTTON
+========================= */
+
+.send {
+  padding: 12px 28px;
+
+  background: #7A421F;
+  color: #F7E7A8;
+
+  border: none;
+  border-radius: 30px;
+
+  font-size: 16px;
+
+  cursor: pointer;
+
+  transition: transform 0.2s ease;
+}
+
+.send:hover {
+  transform: scale(1.05);
+}
+
+
+/* =========================
+   BACK BUTTON
+========================= */
+
+.back {
+  margin-top: 20px;
+
+  background: none;
+  border: none;
+
+  color: #6B351A;
+
+  font-size: 15px;
+
+  cursor: pointer;
+}
+
+
+
+/* =========================
+   FLOATING MESSAGES
+========================= */
+
+#messages {
+  position: absolute;
+  inset: 0;
+
+  z-index: 2;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+
+.floating-message {
+  position: absolute;
+
+  max-width: 220px;
+
+  padding: 14px 18px;
+
+  background: #FFF4C7;
+
+  border: 2px solid #C9362B;
+  border-radius: 16px;
+
+  color: #6B351A;
+
+  font-size: 15px;
+  line-height: 1.4;
+
+  cursor: grab;
+
+  pointer-events: auto;
+
+  user-select: none;
+
+  touch-action: none;
+
+  transform: rotate(var(--rotation));
+
+  animation: float var(--speed) ease-in-out infinite alternate;
+}
+
+
+.floating-message.dragging {
+  cursor: grabbing;
+
+  animation: none;
+
+  z-index: 100;
+}
+
+
+/* =========================
+   FLOATING MOTION
+========================= */
+
+@keyframes float {
+
+  from {
+    transform:
+      translate(
+        calc(var(--x) * -1),
+        calc(var(--y) * -1)
+      )
+      rotate(var(--rotation));
+  }
+
+  to {
+    transform:
+      translate(
+        var(--x),
+        var(--y)
+      )
+      rotate(
+        calc(var(--rotation) + 3deg)
+      );
+  }
+
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+  h1 {
+    font-size: 30px;
+  }
+
+  textarea {
+    width: 80vw;
+  }
+
+  .seed {
+    width: 90px;
+    height: 125px;
+  }
+
+}
+

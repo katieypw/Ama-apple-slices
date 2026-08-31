@@ -1,57 +1,191 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Startup</title>
+  <title>Show Ama Your Love</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #F7E7A8;
-      font-family: Arial, sans-serif;
-    }
-
-    .circle-button {
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      border: none;
-      background: #2A9D8F;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .circle-button:hover {
-      transform: scale(1.05);
-    }
-
-    .circle-button:active {
-      transform: scale(0.95);
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <button class="circle-button" onclick="start()"></button>
+  <main class="page">
 
-  <script>
-    function start() {
-      console.log("Button clicked!");
-      
-      // Put whatever happens next here
-    }
-  </script>
+    <!-- START SCREEN -->
+    <section id="startScreen" class="screen">
+
+      <h1>What do you want to say to your Ama</h1>
+
+      <button class="seed" onclick="openLetterbox()"></button>
+
+    </section>
+
+
+    <!-- LETTERBOX SCREEN -->
+    <section id="letterboxScreen" class="screen hidden">
+
+      <h1>Write something for your Ama</h1>
+
+      <div class="letterbox">
+
+        <textarea
+          id="messageInput"
+          placeholder="Write your message..."
+        ></textarea>
+
+        <button class="send" onclick="sendMessage()">
+          Send ♡
+        </button>
+
+      </div>
+
+      <button class="back" onclick="goBack()">
+        Back
+      </button>
+
+    </section>
+
+
+    <!-- FLOATING MESSAGES -->
+    <div id="messages"></div>
+
+  </main>
+
+
+<script>
+
+/* Open the letterbox */
+function openLetterbox() {
+  document.getElementById("startScreen").classList.add("hidden");
+  document.getElementById("letterboxScreen").classList.remove("hidden");
+}
+
+
+/* Go back to the seed */
+function goBack() {
+  document.getElementById("letterboxScreen").classList.add("hidden");
+  document.getElementById("startScreen").classList.remove("hidden");
+}
+
+
+/* Create one floating message */
+function createMessage(text, x, y) {
+
+  const message = document.createElement("div");
+
+  message.className = "floating-message";
+  message.textContent = text;
+
+  message.style.left = x + "%";
+  message.style.top = y + "%";
+
+  /* Give every message slightly different movement */
+
+  message.style.setProperty(
+    "--x",
+    (Math.random() * 30 - 15) + "px"
+  );
+
+  message.style.setProperty(
+    "--y",
+    (Math.random() * 30 - 15) + "px"
+  );
+
+  message.style.setProperty(
+    "--speed",
+    (Math.random() * 4 + 5) + "s"
+  );
+
+  message.style.setProperty(
+    "--rotation",
+    (Math.random() * 8 - 4) + "deg"
+  );
+
+  document.getElementById("messages").appendChild(message);
+}
+
+
+/* Send a new message */
+function sendMessage() {
+
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+
+  if (text === "") {
+    return;
+  }
+
+
+  /* Choose a position */
+
+  const x = Math.random() * 70 + 15;
+  const y = Math.random() * 70 + 15;
+
+
+  /* Show the message */
+
+  createMessage(text, x, y);
+
+
+  /* Get existing messages */
+
+  let messages =
+    JSON.parse(localStorage.getItem("amaMessages")) || [];
+
+
+  /* Save the new message */
+
+  messages.push({
+    text: text,
+    x: x,
+    y: y
+  });
+
+
+  localStorage.setItem(
+    "amaMessages",
+    JSON.stringify(messages)
+  );
+
+
+  /* Clear the text box */
+
+  input.value = "";
+}
+
+
+/* Load saved messages when the website opens */
+
+function loadMessages() {
+
+  const messages =
+    JSON.parse(localStorage.getItem("amaMessages")) || [];
+
+
+  messages.forEach(function(message) {
+
+    createMessage(
+      message.text,
+      message.x,
+      message.y
+    );
+
+  });
+}
+
+
+/* Run when the page loads */
+
+window.addEventListener("load", loadMessages);
+
+</script>
+
+
 
 </body>
+
 </html>
+
