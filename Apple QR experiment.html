@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Startup</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #F7E7A8;
+      font-family: Arial, sans-serif;
+    }
+
+    .circle-button {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: none;
+      background: #2A9D8F;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .circle-button:hover {
+      transform: scale(1.05);
+    }
+
+    .circle-button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+
+<body>
+
+  <button class="circle-button" onclick="start()"></button>
+
+  <script>
+    function start() {
+      console.log("Button clicked!");
+      
+      // Put whatever happens next here
+    }
+  </script>
+
+</body>
+</html>
