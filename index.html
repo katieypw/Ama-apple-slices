@@ -71,16 +71,62 @@ function goBack() {
 }
 
 
+/* Read messages from local storage */
+function getSavedMessages() {
+  const savedMessages = JSON.parse(localStorage.getItem("amaMessages")) || [];
+
+  return savedMessages
+    .map(function(message, index) {
+      return {
+        id: message.id || "message-" + index,
+        text: String(message.text || "").trim(),
+        x: Number(message.x ?? 50),
+        y: Number(message.y ?? 50)
+      };
+    })
+    .filter(function(message) {
+      return message.text !== "";
+    });
+}
+
+
+/* Save messages to local storage */
+function saveMessages(messages) {
+  localStorage.setItem("amaMessages", JSON.stringify(messages));
+}
+
+
+/* Remove a message from the screen and storage */
+function deleteMessage(id) {
+  const updatedMessages = getSavedMessages().filter(function(message) {
+    return message.id !== id;
+  });
+
+  saveMessages(updatedMessages);
+
+  const messageToRemove = Array.from(
+    document.querySelectorAll(".floating-message")
+  ).find(function(message) {
+    return message.dataset.id === id;
+  });
+
+  if (messageToRemove) {
+    messageToRemove.remove();
+  }
+}
+
+
 /* Create one floating message */
-function createMessage(text, x, y) {
+function createMessage(messageData) {
 
   const message = document.createElement("div");
 
   message.className = "floating-message";
-  message.textContent = text;
+  message.dataset.id = messageData.id;
+  message.textContent = messageData.text;
 
-  message.style.left = x + "%";
-  message.style.top = y + "%";
+  message.style.left = messageData.x + "%";
+  message.style.top = messageData.y + "%";
 
   /* Give every message slightly different movement */
 
@@ -104,6 +150,23 @@ function createMessage(text, x, y) {
     (Math.random() * 8 - 4) + "deg"
   );
 
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "delete-btn";
+  deleteButton.setAttribute("aria-label", "Delete message");
+  deleteButton.textContent = "×";
+
+  deleteButton.addEventListener("mousedown", function(event) {
+    event.stopPropagation();
+  });
+
+  deleteButton.addEventListener("click", function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteMessage(messageData.id);
+  });
+
+  message.appendChild(deleteButton);
   document.getElementById("messages").appendChild(message);
 }
 
@@ -123,32 +186,25 @@ function sendMessage() {
 
   const x = Math.random() * 70 + 15;
   const y = Math.random() * 70 + 15;
+  const messageId = Date.now() + "-" + Math.random().toString(16).slice(2);
+  const messageData = {
+    id: messageId,
+    text: text,
+    x: x,
+    y: y
+  };
 
 
   /* Show the message */
 
-  createMessage(text, x, y);
-
-
-  /* Get existing messages */
-
-  let messages =
-    JSON.parse(localStorage.getItem("amaMessages")) || [];
+  createMessage(messageData);
 
 
   /* Save the new message */
 
-  messages.push({
-    text: text,
-    x: x,
-    y: y
-  });
-
-
-  localStorage.setItem(
-    "amaMessages",
-    JSON.stringify(messages)
-  );
+  const messages = getSavedMessages();
+  messages.push(messageData);
+  saveMessages(messages);
 
 
   /* Clear the text box */
@@ -161,18 +217,10 @@ function sendMessage() {
 
 function loadMessages() {
 
-  const messages =
-    JSON.parse(localStorage.getItem("amaMessages")) || [];
-
+  const messages = getSavedMessages();
 
   messages.forEach(function(message) {
-
-    createMessage(
-      message.text,
-      message.x,
-      message.y
-    );
-
+    createMessage(message);
   });
 }
 

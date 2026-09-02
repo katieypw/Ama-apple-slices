@@ -218,7 +218,7 @@ textarea::placeholder {
 
   max-width: 220px;
 
-  padding: 14px 18px;
+  padding: 14px 28px 14px 18px;
 
   background: #FFF4C7;
 
@@ -241,6 +241,35 @@ textarea::placeholder {
   transform: rotate(var(--rotation));
 
   animation: float var(--speed) ease-in-out infinite alternate;
+}
+
+
+.delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+
+  width: 20px;
+  height: 20px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: rgba(201, 54, 43, 0.12);
+  color: #C9362B;
+
+  font-size: 16px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background: rgba(201, 54, 43, 0.2);
 }
 
 
