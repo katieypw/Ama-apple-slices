@@ -56,182 +56,86 @@
 
 
 <script>
-
-/* Open the letterbox */
 function openLetterbox() {
   document.getElementById("startScreen").classList.add("hidden");
   document.getElementById("letterboxScreen").classList.remove("hidden");
 }
 
-
-/* Go back to the seed */
 function goBack() {
   document.getElementById("letterboxScreen").classList.add("hidden");
   document.getElementById("startScreen").classList.remove("hidden");
 }
 
-
-/* Read messages from local storage */
 function getSavedMessages() {
-  const savedMessages = JSON.parse(localStorage.getItem("amaMessages")) || [];
-
-  return savedMessages
-    .map(function(message, index) {
-      return {
-        id: message.id || "message-" + index,
-        text: String(message.text || "").trim(),
-        x: Number(message.x ?? 50),
-        y: Number(message.y ?? 50)
-      };
-    })
-    .filter(function(message) {
-      return message.text !== "";
-    });
+  return JSON.parse(localStorage.getItem("amaMessages")) || [];
 }
 
-
-/* Save messages to local storage */
 function saveMessages(messages) {
   localStorage.setItem("amaMessages", JSON.stringify(messages));
 }
 
-
-/* Remove a message from the screen and storage */
 function deleteMessage(id) {
-  const updatedMessages = getSavedMessages().filter(function(message) {
+  const messages = getSavedMessages().filter(function(message) {
     return message.id !== id;
   });
 
-  saveMessages(updatedMessages);
+  saveMessages(messages);
 
-  const messageToRemove = Array.from(
-    document.querySelectorAll(".floating-message")
-  ).find(function(message) {
-    return message.dataset.id === id;
-  });
-
-  if (messageToRemove) {
-    messageToRemove.remove();
-  }
+  const message = document.querySelector('.floating-message[data-id="' + id + '"]');
+  if (message) message.remove();
 }
 
+function createMessage(message) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "floating-message";
+  wrapper.dataset.id = message.id;
+  wrapper.style.left = message.x + "%";
+  wrapper.style.top = message.y + "%";
 
-/* Create one floating message */
-function createMessage(messageData) {
+  const text = document.createElement("span");
+  text.textContent = message.text;
 
-  const message = document.createElement("div");
-
-  message.className = "floating-message";
-  message.dataset.id = messageData.id;
-  message.textContent = messageData.text;
-
-  message.style.left = messageData.x + "%";
-  message.style.top = messageData.y + "%";
-
-  /* Give every message slightly different movement */
-
-  message.style.setProperty(
-    "--x",
-    (Math.random() * 30 - 15) + "px"
-  );
-
-  message.style.setProperty(
-    "--y",
-    (Math.random() * 30 - 15) + "px"
-  );
-
-  message.style.setProperty(
-    "--speed",
-    (Math.random() * 4 + 5) + "s"
-  );
-
-  message.style.setProperty(
-    "--rotation",
-    (Math.random() * 8 - 4) + "deg"
-  );
-
-  const deleteButton = document.createElement("button");
-  deleteButton.type = "button";
-  deleteButton.className = "delete-btn";
-  deleteButton.setAttribute("aria-label", "Delete message");
-  deleteButton.textContent = "×";
-
-  deleteButton.addEventListener("mousedown", function(event) {
-    event.stopPropagation();
+  const close = document.createElement("button");
+  close.type = "button";
+  close.textContent = "×";
+  close.className = "delete-btn";
+  close.addEventListener("click", function() {
+    deleteMessage(message.id);
   });
 
-  deleteButton.addEventListener("click", function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    deleteMessage(messageData.id);
-  });
-
-  message.appendChild(deleteButton);
-  document.getElementById("messages").appendChild(message);
+  wrapper.appendChild(text);
+  wrapper.appendChild(close);
+  document.getElementById("messages").appendChild(wrapper);
 }
 
-
-/* Send a new message */
 function sendMessage() {
-
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
 
-  if (text === "") {
-    return;
-  }
+  if (!text) return;
 
-
-  /* Choose a position */
-
-  const x = Math.random() * 70 + 15;
-  const y = Math.random() * 70 + 15;
-  const messageId = Date.now() + "-" + Math.random().toString(16).slice(2);
-  const messageData = {
-    id: messageId,
+  const message = {
+    id: Date.now() + "-" + Math.random().toString(16).slice(2),
     text: text,
-    x: x,
-    y: y
+    x: Math.random() * 70 + 15,
+    y: Math.random() * 70 + 15
   };
 
-
-  /* Show the message */
-
-  createMessage(messageData);
-
-
-  /* Save the new message */
-
   const messages = getSavedMessages();
-  messages.push(messageData);
+  messages.push(message);
   saveMessages(messages);
 
-
-  /* Clear the text box */
-
+  createMessage(message);
   input.value = "";
 }
 
-
-/* Load saved messages when the website opens */
-
 function loadMessages() {
-
   const messages = getSavedMessages();
-
-  messages.forEach(function(message) {
-    createMessage(message);
-  });
+  messages.forEach(createMessage);
 }
 
-
-/* Run when the page loads */
-
 window.addEventListener("load", loadMessages);
-
 </script>
-
-
 
 </body>
 
