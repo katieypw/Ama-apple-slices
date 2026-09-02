@@ -99,14 +99,22 @@ function createMessage(message) {
   close.type = "button";
   close.textContent = "×";
   close.className = "delete-btn";
-  close.addEventListener("click", function() {
-    deleteMessage(message.id);
-  });
+  close.setAttribute("aria-label", "Delete message");
 
   wrapper.appendChild(text);
   wrapper.appendChild(close);
   document.getElementById("messages").appendChild(wrapper);
 }
+
+document.getElementById("messages").addEventListener("click", function(event) {
+  const button = event.target.closest(".delete-btn");
+  if (!button) return;
+
+  const message = button.closest(".floating-message");
+  if (!message) return;
+
+  deleteMessage(message.dataset.id);
+});
 
 function sendMessage() {
   const input = document.getElementById("messageInput");

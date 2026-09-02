@@ -230,17 +230,15 @@ textarea::placeholder {
   font-size: 15px;
   line-height: 1.4;
 
-  cursor: grab;
+  cursor: default;
 
   pointer-events: auto;
 
   user-select: none;
 
-  touch-action: none;
+  touch-action: manipulation;
 
-  transform: rotate(var(--rotation));
-
-  animation: float var(--speed) ease-in-out infinite alternate;
+  z-index: 1;
 }
 
 
@@ -263,7 +261,7 @@ textarea::placeholder {
 
   cursor: pointer;
   pointer-events: auto;
-  z-index: 2;
+  z-index: 3;
 
   display: flex;
   align-items: center;
