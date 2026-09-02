@@ -273,44 +273,6 @@ textarea::placeholder {
 }
 
 
-.floating-message.dragging {
-  cursor: grabbing;
-
-  animation: none;
-
-  z-index: 100;
-}
-
-
-/* =========================
-   FLOATING MOTION
-========================= */
-
-@keyframes float {
-
-  from {
-    transform:
-      translate(
-        calc(var(--x) * -1),
-        calc(var(--y) * -1)
-      )
-      rotate(var(--rotation));
-  }
-
-  to {
-    transform:
-      translate(
-        var(--x),
-        var(--y)
-      )
-      rotate(
-        calc(var(--rotation) + 3deg)
-      );
-  }
-
-}
-
-
 /* =========================
    MOBILE
 ========================= */
