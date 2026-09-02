@@ -100,21 +100,17 @@ function createMessage(message) {
   close.textContent = "×";
   close.className = "delete-btn";
   close.setAttribute("aria-label", "Delete message");
+  close.style.pointerEvents = "auto";
+  close.onclick = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    deleteMessage(message.id);
+  };
 
   wrapper.appendChild(text);
   wrapper.appendChild(close);
   document.getElementById("messages").appendChild(wrapper);
 }
-
-document.getElementById("messages").addEventListener("click", function(event) {
-  const button = event.target.closest(".delete-btn");
-  if (!button) return;
-
-  const message = button.closest(".floating-message");
-  if (!message) return;
-
-  deleteMessage(message.dataset.id);
-});
 
 function sendMessage() {
   const input = document.getElementById("messageInput");
