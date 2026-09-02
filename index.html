@@ -19,7 +19,7 @@
 
       <h1>Say something to your Ama</h1>
 
-      <button class="seed" onclick="openLetterbox()"></button>
+      <button class="seed" type="button"></button>
 
     </section>
 
@@ -36,13 +36,13 @@
           placeholder="Write your message..."
         ></textarea>
 
-        <button class="send" onclick="sendMessage()">
+        <button class="send" type="button">
           Send ♡
         </button>
 
       </div>
 
-      <button class="back" onclick="goBack()">
+      <button class="back" type="button">
         Back
       </button>
 
@@ -51,6 +51,8 @@
 
     <!-- FLOATING MESSAGES -->
     <div id="messages"></div>
+
+    <button id="clearAllBtn" class="clear-all" type="button">Clear all</button>
 
   </main>
 
@@ -74,6 +76,12 @@ function saveMessages(messages) {
   localStorage.setItem("amaMessages", JSON.stringify(messages));
 }
 
+function updateClearAllButton() {
+  const button = document.getElementById("clearAllBtn");
+  const hasItems = getSavedMessages().length > 0;
+  button.classList.toggle("hidden", !hasItems);
+}
+
 function deleteMessage(id) {
   const messages = getSavedMessages().filter(function(message) {
     return message.id !== id;
@@ -82,15 +90,44 @@ function deleteMessage(id) {
   saveMessages(messages);
 
   const message = document.querySelector('.floating-message[data-id="' + id + '"]');
-  if (message) message.remove();
+  if (message) {
+    message.remove();
+  }
+
+  updateClearAllButton();
 }
 
-function createMessage(message) {
+function clearAllMessages() {
+  localStorage.removeItem("amaMessages");
+  document.getElementById("messages").innerHTML = "";
+  updateClearAllButton();
+}
+
+function getMessagePosition(index) {
+  const isMobile = window.innerWidth <= 600;
+  const column = index % 2;
+  const row = Math.floor(index / 2);
+
+  if (isMobile) {
+    return {
+      x: column === 0 ? 3 : 52,
+      y: Math.min(8 + row * 18, 68)
+    };
+  }
+
+  return {
+    x: column === 0 ? 3 : 75,
+    y: Math.min(10 + row * 18, 70)
+  };
+}
+
+function createMessage(message, index) {
+  const position = getMessagePosition(index);
   const wrapper = document.createElement("div");
   wrapper.className = "floating-message";
   wrapper.dataset.id = message.id;
-  wrapper.style.left = message.x + "%";
-  wrapper.style.top = message.y + "%";
+  wrapper.style.left = position.x + "%";
+  wrapper.style.top = position.y + "%";
 
   const text = document.createElement("span");
   text.textContent = message.text;
@@ -100,12 +137,7 @@ function createMessage(message) {
   close.textContent = "×";
   close.className = "delete-btn";
   close.setAttribute("aria-label", "Delete message");
-  close.style.pointerEvents = "auto";
-  close.onclick = function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    deleteMessage(message.id);
-  };
+  close.title = "Delete message";
 
   wrapper.appendChild(text);
   wrapper.appendChild(close);
@@ -129,14 +161,52 @@ function sendMessage() {
   messages.push(message);
   saveMessages(messages);
 
-  createMessage(message);
+  createMessage(message, messages.length - 1);
+  updateClearAllButton();
   input.value = "";
 }
 
 function loadMessages() {
   const messages = getSavedMessages();
   messages.forEach(createMessage);
+  updateClearAllButton();
 }
+
+document.addEventListener("click", function(event) {
+  const seedButton = event.target.closest(".seed");
+  if (seedButton) {
+    openLetterbox();
+    return;
+  }
+
+  const sendButton = event.target.closest(".send");
+  if (sendButton) {
+    sendMessage();
+    return;
+  }
+
+  const backButton = event.target.closest(".back");
+  if (backButton) {
+    goBack();
+    return;
+  }
+
+  const clearButton = event.target.closest("#clearAllBtn");
+  if (clearButton) {
+    clearAllMessages();
+    return;
+  }
+
+  const deleteButton = event.target.closest(".delete-btn");
+  if (deleteButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    const message = deleteButton.closest(".floating-message");
+    if (message) {
+      deleteMessage(message.dataset.id);
+    }
+  }
+});
 
 window.addEventListener("load", loadMessages);
 </script>
