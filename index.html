@@ -54,10 +54,33 @@
 
   </main>
 
-  <button id="clearAllBtn" class="clear-all" type="button">Clear all</button>
+  <button id="clearAllBtn" class="clear-all hidden" type="button">Clear all</button>
 
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  push,
+  remove,
+  onValue
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBiVagzCjP3QbQTBnZScU9-t0Z5bTB6TaQ",
+  authDomain: "ama-apple-slices-632d6.firebaseapp.com",
+  databaseURL: "https://ama-apple-slices-632d6-default-rtdb.firebaseio.com",
+  projectId: "ama-apple-slices-632d6",
+  storageBucket: "ama-apple-slices-632d6.firebasestorage.app",
+  messagingSenderId: "1066071276007",
+  appId: "1:1066071276007:web:9fc64cd0b050523f04a542"
+};
+
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const messagesRef = ref(database, "messages");
+
 function openLetterbox() {
   document.getElementById("startScreen").classList.add("hidden");
   document.getElementById("letterboxScreen").classList.remove("hidden");
@@ -68,39 +91,19 @@ function goBack() {
   document.getElementById("startScreen").classList.remove("hidden");
 }
 
-function getSavedMessages() {
-  return JSON.parse(localStorage.getItem("amaMessages")) || [];
-}
-
-function saveMessages(messages) {
-  localStorage.setItem("amaMessages", JSON.stringify(messages));
-}
+let savedMessages = [];
 
 function updateClearAllButton() {
   const button = document.getElementById("clearAllBtn");
-  const hasItems = getSavedMessages().length > 0;
-  button.classList.toggle("hidden", !hasItems);
+  button.classList.toggle("hidden", savedMessages.length === 0);
 }
 
-function deleteMessage(id) {
-  const messages = getSavedMessages().filter(function(message) {
-    return message.id !== id;
-  });
-
-  saveMessages(messages);
-
-  const message = document.querySelector('.floating-message[data-id="' + id + '"]');
-  if (message) {
-    message.remove();
-  }
-
-  updateClearAllButton();
+async function deleteMessage(id) {
+  await remove(ref(database, "messages/" + id));
 }
 
-function clearAllMessages() {
-  localStorage.removeItem("amaMessages");
-  document.getElementById("messages").innerHTML = "";
-  updateClearAllButton();
+async function clearAllMessages() {
+  await remove(messagesRef);
 }
 
 function getMessagePosition(index) {
@@ -144,32 +147,33 @@ function createMessage(message, index) {
   document.getElementById("messages").appendChild(wrapper);
 }
 
-function sendMessage() {
+async function sendMessage() {
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
 
   if (!text) return;
 
-  const message = {
-    id: Date.now() + "-" + Math.random().toString(16).slice(2),
-    text: text,
-    x: Math.random() * 70 + 15,
-    y: Math.random() * 70 + 15
-  };
-
-  const messages = getSavedMessages();
-  messages.push(message);
-  saveMessages(messages);
-
-  createMessage(message, messages.length - 1);
-  updateClearAllButton();
+  await push(messagesRef, { text: text });
   input.value = "";
 }
 
-function loadMessages() {
-  const messages = getSavedMessages();
-  messages.forEach(createMessage);
+function renderMessages() {
+  document.getElementById("messages").innerHTML = "";
+  savedMessages.forEach(createMessage);
   updateClearAllButton();
+}
+
+async function loadMessages() {
+  onValue(messagesRef, function(snapshot) {
+    savedMessages = [];
+    snapshot.forEach(function(child) {
+      savedMessages.push({
+        id: child.key,
+        text: child.val().text
+      });
+    });
+    renderMessages();
+  });
 }
 
 document.addEventListener("click", function(event) {
@@ -208,7 +212,9 @@ document.addEventListener("click", function(event) {
   }
 });
 
-window.addEventListener("load", loadMessages);
+window.addEventListener("load", function() {
+  loadMessages();
+});
 </script>
 
 </body>
