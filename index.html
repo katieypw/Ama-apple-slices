@@ -66,6 +66,10 @@ import {
   remove,
   onValue
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+import {
+  getAuth,
+  signInAnonymously
+} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBiVagzCjP3QbQTBnZScU9-t0Z5bTB6TaQ",
@@ -80,6 +84,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const messagesRef = ref(database, "messages");
+const auth = getAuth(app);
+let currentUser = null;
 
 function openLetterbox() {
   document.getElementById("startScreen").classList.add("hidden");
@@ -99,11 +105,24 @@ function updateClearAllButton() {
 }
 
 async function deleteMessage(id) {
+  const message = savedMessages.find(function(item) {
+    return item.id === id;
+  });
+
+  if (!message || !currentUser || message.userId !== currentUser.uid) return;
   await remove(ref(database, "messages/" + id));
 }
 
 async function clearAllMessages() {
-  await remove(messagesRef);
+  if (!currentUser) return;
+
+  const ownMessages = savedMessages.filter(function(message) {
+    return message.userId === currentUser.uid;
+  });
+
+  await Promise.all(ownMessages.map(function(message) {
+    return remove(ref(database, "messages/" + message.id));
+  }));
 }
 
 function getMessagePosition(index) {
@@ -141,6 +160,7 @@ function createMessage(message, index) {
   close.className = "delete-btn";
   close.setAttribute("aria-label", "Delete message");
   close.title = "Delete message";
+  close.hidden = !currentUser || message.userId !== currentUser.uid;
 
   wrapper.appendChild(text);
   wrapper.appendChild(close);
@@ -153,7 +173,13 @@ async function sendMessage() {
 
   if (!text) return;
 
-  await push(messagesRef, { text: text });
+  if (!currentUser) return;
+
+  await push(messagesRef, {
+    text: text,
+    userId: currentUser.uid,
+    createdAt: Date.now()
+  });
   input.value = "";
 }
 
@@ -169,7 +195,8 @@ async function loadMessages() {
     snapshot.forEach(function(child) {
       savedMessages.push({
         id: child.key,
-        text: child.val().text
+        text: child.val().text,
+        userId: child.val().userId
       });
     });
     renderMessages();
@@ -212,7 +239,9 @@ document.addEventListener("click", function(event) {
   }
 });
 
-window.addEventListener("load", function() {
+window.addEventListener("load", async function() {
+  const result = await signInAnonymously(auth);
+  currentUser = result.user;
   loadMessages();
 });
 </script>
