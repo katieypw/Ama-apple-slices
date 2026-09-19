@@ -50,7 +50,9 @@
 
 
     <!-- FLOATING MESSAGES -->
-    <div id="messages"></div>
+    <div id="messages" aria-label="Messages">
+      <span class="scroll-hint hidden">Scroll for more</span>
+    </div>
 
   </main>
 
@@ -125,31 +127,11 @@ async function clearAllMessages() {
   }));
 }
 
-function getMessagePosition(index) {
-  const isMobile = window.innerWidth <= 600;
-  const column = index % 2;
-  const row = Math.floor(index / 2);
-
-  if (isMobile) {
-    return {
-      x: column === 0 ? 3 : 52,
-      y: Math.min(8 + row * 18, 68)
-    };
-  }
-
-  return {
-    x: column === 0 ? 3 : 75,
-    y: Math.min(10 + row * 18, 70)
-  };
-}
-
 function createMessage(message, index) {
-  const position = getMessagePosition(index);
   const wrapper = document.createElement("div");
   wrapper.className = "floating-message";
   wrapper.dataset.id = message.id;
-  wrapper.style.left = position.x + "%";
-  wrapper.style.top = position.y + "%";
+  wrapper.style.setProperty("--float-delay", (index * -0.8) + "s");
 
   const text = document.createElement("span");
   text.textContent = message.text;
@@ -165,6 +147,53 @@ function createMessage(message, index) {
   wrapper.appendChild(text);
   wrapper.appendChild(close);
   document.getElementById("messages").appendChild(wrapper);
+}
+
+function avoidTitleOverlap() {
+  const title = document.querySelector(".screen:not(.hidden) h1");
+  const messages = document.getElementById("messages");
+
+  if (!title || !messages) return;
+
+  const titleRect = title.getBoundingClientRect();
+  const messagesRect = messages.getBoundingClientRect();
+  const titleCenter = (titleRect.left + titleRect.right) / 2;
+
+  messages.querySelectorAll(".floating-message").forEach(function(wrapper) {
+    const messageRect = wrapper.getBoundingClientRect();
+    const overlaps = messageRect.left < titleRect.right &&
+      messageRect.right > titleRect.left &&
+      messageRect.top < titleRect.bottom &&
+      messageRect.bottom > titleRect.top;
+
+    if (!overlaps) {
+      wrapper.style.setProperty("--avoid-x", "0px");
+      return;
+    }
+
+    const moveLeft = titleRect.left - messageRect.right - 12;
+    const moveRight = titleRect.right - messageRect.left + 12;
+    const preferredMove = messageRect.left + messageRect.width / 2 < titleCenter
+      ? moveLeft
+      : moveRight;
+    const minMove = messagesRect.left + 4 - messageRect.left;
+    const maxMove = messagesRect.right - 4 - messageRect.right;
+    const safeMove = Math.max(minMove, Math.min(maxMove, preferredMove));
+
+    wrapper.style.setProperty("--avoid-x", safeMove + "px");
+  });
+}
+
+function updateScrollHint() {
+  const messages = document.getElementById("messages");
+  if (!messages) return;
+  const hint = messages.querySelector(".scroll-hint");
+
+  const canScroll = messages.scrollHeight > messages.clientHeight;
+  messages.title = canScroll
+    ? "Scroll to see more messages"
+    : "";
+  hint.classList.toggle("hidden", !canScroll);
 }
 
 async function sendMessage() {
@@ -184,9 +213,16 @@ async function sendMessage() {
 }
 
 function renderMessages() {
-  document.getElementById("messages").innerHTML = "";
+  const messages = document.getElementById("messages");
+  messages.querySelectorAll(".floating-message").forEach(function(message) {
+    message.remove();
+  });
   savedMessages.forEach(createMessage);
   updateClearAllButton();
+  requestAnimationFrame(function() {
+    avoidTitleOverlap();
+    updateScrollHint();
+  });
 }
 
 async function loadMessages() {
@@ -238,6 +274,9 @@ document.addEventListener("click", function(event) {
     }
   }
 });
+
+window.addEventListener("resize", avoidTitleOverlap);
+window.addEventListener("resize", updateScrollHint);
 
 window.addEventListener("load", async function() {
   const result = await signInAnonymously(auth);

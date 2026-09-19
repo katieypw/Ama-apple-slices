@@ -57,7 +57,12 @@ body {
   align-items: center;
 
   position: relative;
-  z-index: 3;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.screen > * {
+  pointer-events: auto;
 }
 
 .hidden {
@@ -244,21 +249,44 @@ textarea::placeholder {
   position: absolute;
   inset: 0;
 
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-content: start;
+  gap: 9px 12px;
+  padding: 4% 4%;
+
   z-index: 4;
 
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
 
+  pointer-events: auto;
+}
+
+.scroll-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(107, 53, 26, 0.42);
+  color: #F7E7A8;
+  font-size: 10px;
+  opacity: 0.82;
+  backdrop-filter: blur(4px);
   pointer-events: none;
+  z-index: 6;
 }
 
 
 .floating-message {
-  position: absolute;
+  width: fit-content;
+  max-width: min(100%, 125px);
+  justify-self: center;
 
-  width: min(220px, 24vw);
-  min-width: 130px;
-
-  padding: 14px 32px 14px 18px;
+  padding: 7px 23px 7px 9px;
 
   background: #FFF4C7;
 
@@ -267,8 +295,8 @@ textarea::placeholder {
 
   color: #6B351A;
 
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: 10px;
+  line-height: 1.25;
 
   cursor: default;
 
@@ -279,6 +307,18 @@ textarea::placeholder {
   touch-action: manipulation;
 
   z-index: 2;
+  overflow-wrap: anywhere;
+  animation: messageFloat 6s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+@keyframes messageFloat {
+  0%, 100% {
+    transform: translate3d(var(--avoid-x, 0px), 0, 0) rotate(-1deg);
+  }
+  50% {
+    transform: translate3d(var(--avoid-x, 0px), -4px, 0) rotate(1deg);
+  }
 }
 
 
@@ -287,8 +327,8 @@ textarea::placeholder {
   top: 6px;
   right: 8px;
 
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
 
   border: none;
   border-radius: 50%;
@@ -296,7 +336,7 @@ textarea::placeholder {
   background: rgba(201, 54, 43, 0.14);
   color: #C9362B;
 
-  font-size: 22px;
+  font-size: 16px;
   line-height: 1;
   font-weight: 700;
 
@@ -359,8 +399,13 @@ textarea::placeholder {
   }
 
   .floating-message {
-    width: min(180px, 42vw);
-    min-width: 0;
+    max-width: 100%;
+  }
+
+  #messages {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px 7px;
+    padding: 5% 5%;
   }
 
   .clear-all {
@@ -374,7 +419,8 @@ textarea::placeholder {
 
 @media (prefers-reduced-motion: reduce) {
   .seed,
-  .seed::before {
+  .seed::before,
+  .floating-message {
     animation: none;
   }
 }
