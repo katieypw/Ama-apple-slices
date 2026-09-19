@@ -400,6 +400,26 @@ textarea::placeholder {
 
   .floating-message {
     max-width: 100%;
+    padding: 5px 18px 5px 7px;
+    border-radius: 11px;
+    font-size: 8px;
+    line-height: 1.2;
+  }
+
+  #messages {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 10px;
+    overflow-y: auto;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .delete-btn {
+    top: 4px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    font-size: 13px;
   }
 
   #messages {
