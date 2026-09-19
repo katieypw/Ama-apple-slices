@@ -314,10 +314,10 @@ textarea::placeholder {
 
 @keyframes messageFloat {
   0%, 100% {
-    transform: translate3d(var(--avoid-x, 0px), 0, 0) rotate(-1deg);
+    transform: translate3d(0, 0, 0) rotate(-1deg);
   }
   50% {
-    transform: translate3d(var(--avoid-x, 0px), -4px, 0) rotate(1deg);
+    transform: translate3d(0, -4px, 0) rotate(1deg);
   }
 }
 

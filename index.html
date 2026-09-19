@@ -149,41 +149,6 @@ function createMessage(message, index) {
   document.getElementById("messages").appendChild(wrapper);
 }
 
-function avoidTitleOverlap() {
-  const title = document.querySelector(".screen:not(.hidden) h1");
-  const messages = document.getElementById("messages");
-
-  if (!title || !messages) return;
-
-  const titleRect = title.getBoundingClientRect();
-  const messagesRect = messages.getBoundingClientRect();
-  const titleCenter = (titleRect.left + titleRect.right) / 2;
-
-  messages.querySelectorAll(".floating-message").forEach(function(wrapper) {
-    const messageRect = wrapper.getBoundingClientRect();
-    const overlaps = messageRect.left < titleRect.right &&
-      messageRect.right > titleRect.left &&
-      messageRect.top < titleRect.bottom &&
-      messageRect.bottom > titleRect.top;
-
-    if (!overlaps) {
-      wrapper.style.setProperty("--avoid-x", "0px");
-      return;
-    }
-
-    const moveLeft = titleRect.left - messageRect.right - 12;
-    const moveRight = titleRect.right - messageRect.left + 12;
-    const preferredMove = messageRect.left + messageRect.width / 2 < titleCenter
-      ? moveLeft
-      : moveRight;
-    const minMove = messagesRect.left + 4 - messageRect.left;
-    const maxMove = messagesRect.right - 4 - messageRect.right;
-    const safeMove = Math.max(minMove, Math.min(maxMove, preferredMove));
-
-    wrapper.style.setProperty("--avoid-x", safeMove + "px");
-  });
-}
-
 function updateScrollHint() {
   const messages = document.getElementById("messages");
   if (!messages) return;
@@ -220,7 +185,6 @@ function renderMessages() {
   savedMessages.forEach(createMessage);
   updateClearAllButton();
   requestAnimationFrame(function() {
-    avoidTitleOverlap();
     updateScrollHint();
   });
 }
@@ -275,7 +239,6 @@ document.addEventListener("click", function(event) {
   }
 });
 
-window.addEventListener("resize", avoidTitleOverlap);
 window.addEventListener("resize", updateScrollHint);
 
 window.addEventListener("load", async function() {
